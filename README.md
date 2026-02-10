@@ -18,25 +18,6 @@
 - **Bilingual Support**: Automatic Chinese/English prompt selection based on folder naming
 - **5-Dimensional Metrics**: goal, logic, consistency, ui, quality
 
-## Dataset
-
-The GEBench dataset is available on HuggingFace:
-
-📊 **[StepFun-ai/GEBench](https://huggingface.co/datasets/stepfun-ai/GEBench)** - HuggingFace Datasets Hub
-
-To download:
-```bash
-from datasets import load_dataset
-dataset = load_dataset("stepfun-ai/GEBench")
-```
-
-Or use Git LFS:
-```bash
-git clone https://huggingface.co/datasets/stepfun-ai/GEBench
-cd GEBench
-git lfs pull
-```
-
 ## Quick Start
 
 ### Installation
@@ -52,6 +33,18 @@ conda activate gebench
 
 # Install dependencies
 pip install -r requirements.txt
+```
+### Data
+
+The GEBench data is available on HuggingFace:
+
+📊 **[StepFun-ai/GEBench](https://huggingface.co/datasets/stepfun-ai/GEBench)** - HuggingFace Datasets Hub
+
+To download:
+
+```bash
+cd /path/to/GEBench
+git clone https://huggingface.co/datasets/stepfun-ai/GEBench ./data
 ```
 
 ### Generate Images
