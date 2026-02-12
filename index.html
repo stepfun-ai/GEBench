@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <!-- Meta tags for social media banners, these should be filled in appropriatly as they are your "business card" -->
+  <!-- Replace the content tag with appropriate information -->
+  <meta name="description" content="GEBench benchmarks image generation models as GUI environments, evaluating dynamic interaction, temporal coherence, and GUI-specific state transitions.">
+  <meta property="og:title" content="GEBench: Benchmarking Image Generation Models as GUI Environments"/>
+  <meta property="og:description" content="GEBench benchmarks image generation models as GUI environments, evaluating dynamic interaction, temporal coherence, and GUI-specific state transitions."/>
+  <meta property="og:url" content="URL OF THE WEBSITE"/>
+  <!-- Path to banner image, should be in the path listed below. Optimal dimenssions are 1200X630-->
+  <meta property="og:image" content="figures/teaser.png" />
+  <meta property="og:image:width" content="1200"/>
+  <meta property="og:image:height" content="630"/>
+
+
+  <meta name="twitter:title" content="GEBench: Benchmarking Image Generation Models as GUI Environments">
+  <meta name="twitter:description" content="GEBench benchmarks image generation models as GUI environments, evaluating dynamic interaction, temporal coherence, and GUI-specific state transitions.">
+  <!-- Path to banner image, should be in the path listed below. Optimal dimenssions are 1200X600-->
+  <meta name="twitter:image" content="figures/teaser.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <!-- Keywords for your paper to be indexed by-->
+  <meta name="keywords" content="Image Generation, GUI Environments, Benchmark, Temporal Coherence, State Transitions, GEBench">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+  <title>GEBench: Benchmarking Image Generation Models as GUI Environments</title>
+  <style>
+    .title-line1 {
+      font-style: italic;
+      display: block;
+      margin-bottom: 10px;
+      color: #808080;
+      font-size: 1.3em;
+    }
+
+    .title-line2 {
+      display: block;
+      font-size: 0.85em;
+    }
+    
+    .vibe-v {
+      color: #03045E;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    }
+    
+    .vibe-i {
+      color: #0077B6;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    }
+    
+    .vibe-b {
+      color: #00B4D8;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    }
+    
+    .vibe-e {
+      color: #0096C7;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    }
+    
+    /* Gallery Styles */
+    .gallery-section {
+      padding: 40px 20px;
+      background: #f8f9fa;
+    }
+    
+    .gallery-container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    .gallery-title {
+      text-align: center;
+      font-size: 2rem;
+      margin-bottom: 2rem;
+      color: #333;
+    }
+    
+    .gallery-grid {
+      column-count: 4;
+      column-gap: 20px;
+      padding: 20px 0;
+      column-fill: balance;
+      overflow: visible;
+    }
+    
+    @media (max-width: 1200px) {
+      .gallery-grid {
+        column-count: 3;
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .gallery-grid {
+        column-count: 2;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .gallery-grid {
+        column-count: 1;
+      }
+    }
+    
+    .gallery-item {
+      position: relative;
+      overflow: hidden;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease, box-shadow 0.3s ease, opacity 0.3s ease, filter 0.3s ease;
+      cursor: pointer;
+      background: white;
+      margin-bottom: 20px;
+      break-inside: avoid;
+      display: inline-block;
+      width: 100%;
+    }
+
+    .gallery-grid:hover .gallery-item:not(:hover) {
+      opacity: 0.4;
+      filter: brightness(0.5) blur(1px);
+    }
+    
+    .gallery-item:hover {
+      transform: translateY(-5px) scale(1.02);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+      overflow: visible;
+      z-index: 5000;
+    }
+    
+    .gallery-item img {
+      width: 100%;
+      height: auto;
+      object-fit: contain;
+      display: block;
+      transition: opacity 0.3s ease;
+    }
+    
+    .gallery-item .original-img {
+      position: relative;
+      z-index: 2;
+    }
+    
+    .gallery-item .edited-img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 1;
+      opacity: 0;
+    }
+    
+    .gallery-item:hover .original-img {
+      opacity: 0;
+    }
+    
+    .gallery-item:hover .edited-img {
+      opacity: 1;
+    }
+    
+    .gallery-label {
+      position: absolute;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 0, 0, 0.6);
+      color: white;
+      padding: 8px 20px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      z-index: 3;
+      pointer-events: none;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      max-width: 90%;
+      width: fit-content;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      text-align: center;
+    }
+    
+    .gallery-label-original {
+      opacity: 1;
+    }
+    
+    .gallery-label-edited {
+      opacity: 0;
+      background: rgba(0, 123, 255, 0.8);
+      bottom: auto;
+      top: 10px;
+    }
+    
+    .gallery-item:hover .gallery-label-original {
+      left: auto;
+      right: 105%;
+      bottom: auto;
+      top: 50%;
+      transform: translateY(-50%);
+      white-space: normal;
+      word-wrap: break-word;
+      line-height: 1.4;
+      height: auto;
+      overflow: visible;
+      width: 280px;
+      max-width: none;
+      border-radius: 12px;
+      background: rgba(0, 123, 255, 0.9);
+      z-index: 6000;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    }
+    
+    .gallery-item:hover .gallery-label-edited {
+      opacity: 1;
+    }
+    
+    /* Loading placeholder */
+    .gallery-item img {
+      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+      background-size: 200% 100%;
+      animation: loading 1.5s infinite;
+    }
+    
+    .gallery-item img[src] {
+      animation: none;
+    }
+    
+    @keyframes loading {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+    
+    /* Fade in when loaded */
+    .gallery-item img {
+      opacity: 0;
+      transition: opacity 0.3s ease-in;
+    }
+    
+    .gallery-item img.loaded {
+      opacity: 1;
+    }
+
+    /* Leaderboard Styles */
+    .leaderboard-section {
+      padding: 30px 20px 10px;
+      background: #ffffff;
+    }
+
+    .leaderboard-card {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+      padding: 20px 18px;
+    }
+
+    .leaderboard-title {
+      text-align: center;
+      font-size: 1.8rem;
+      margin-bottom: 16px;
+      color: #222;
+    }
+
+    .leaderboard-subtitle {
+      text-align: center;
+      color: #666;
+      font-size: 0.95rem;
+      margin-top: -8px;
+      margin-bottom: 18px;
+    }
+
+    .leaderboard-table-wrap {
+      overflow-x: auto;
+    }
+
+    .leaderboard-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+      min-width: 980px;
+    }
+
+    .leaderboard-table th,
+    .leaderboard-table td {
+      padding: 10px 8px;
+      border-bottom: 1px solid #e9ecef;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    .leaderboard-table th:first-child,
+    .leaderboard-table td:first-child {
+      text-align: left;
+    }
+
+    .leaderboard-table th:not(:first-child),
+    .leaderboard-table td:not(:first-child) {
+      text-align: center !important;
+    }
+
+    .leaderboard-table .group-divider {
+      border-left: 1px solid #eef1f4;
+    }
+
+    .leaderboard-table tbody td:nth-child(3),
+    .leaderboard-table tbody td:nth-child(8),
+    .leaderboard-table tbody td:nth-child(12),
+    .leaderboard-table tbody td:nth-child(16) {
+      border-left: 1px solid #eef1f4;
+    }
+
+    .leaderboard-table thead th {
+      background: #f7f8fa;
+      color: #333;
+      font-weight: 600;
+    }
+
+    .leaderboard-table .model-cell {
+      text-align: left;
+      font-weight: 600;
+      color: #222;
+    }
+
+    .leaderboard-table .group-header {
+      background: #f1f3f6;
+      font-weight: 700;
+    }
+
+    .leaderboard-table .best {
+      color: #0b63f6;
+      font-weight: 700;
+    }
+
+    .leaderboard-table .second {
+      color: inherit;
+      font-weight: inherit;
+    }
+
+    .leaderboard-table .divider-row td {
+      border-top: 2px solid #dfe3e8;
+    }
+
+    .leaderboard-table .overall {
+      background: #f9fafb;
+      font-weight: 700;
+    }
+  </style>
+  <link rel="icon" type="image/png" href="figures/radar.png">
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro"
+  rel="stylesheet">
+
+  <link rel="stylesheet" href="static/css/bulma.min.css">
+  <link rel="stylesheet" href="static/css/fontawesome.all.min.css">
+  <link rel="stylesheet"
+  href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+  <link rel="stylesheet" href="static/css/index.css">
+
+  <script defer src="static/js/fontawesome.all.min.js"></script>
+  <!-- Removed carousel/slider scripts to avoid unnecessary animations -->
+</head>
+<body>
+
+
+  <section class="hero geb-hero">
+    <div class="hero-body">
+      <div class="container is-max-desktop">
+        <div class="columns is-centered">
+          <div class="column has-text-centered">
+            <h1 class="title is-2 publication-title">
+              <span class="title-line1">GEBench</span>
+              <span class="title-line2">Benchmarking Image Generation Models as GUI Environments</span>
+            </h1>
+            <div class="hero-tags">
+              <span class="hero-tag">700 Samples</span>
+              <span class="hero-tag">5 Task Categories</span>
+              <span class="hero-tag">GUI Environments</span>
+            </div>
+            <div class="is-size-6 publication-authors">
+              <!-- Paper authors -->
+              <span class="author-block">
+                Haodong Li<sup>1,2</sup>, Jingwei Wu<sup>1</sup>, Quan Sun<sup>1,†</sup>, Guopeng Li<sup>1</sup>, Juanxi Tian<sup>7</sup>, Huanyu Zhang<sup>5</sup>, Yanlin Lai<sup>1,4</sup>, Ruichuan An<sup>3</sup>,<br/>
+                Hongbo Peng<sup>1</sup>, Yuhong Dai<sup>1</sup>, Chenxi Li<sup>6</sup>, Chunmei Qing<sup>2,∗</sup>, Jia Wang<sup>1</sup>, Ziyang Meng<sup>1</sup>, Zheng Ge<sup>1,∗</sup>, Xiangyu Zhang<sup>1</sup>, Daxin Jiang<sup>1</sup>
+              </span>
+                  </div>
+
+                  <div class="is-size-6 publication-authors" >
+                    <span class="author-block">
+                      <sup>1</sup>StepFun&nbsp;&nbsp;&nbsp;&nbsp;
+                      <sup>2</sup>South China University of Technology&nbsp;&nbsp;&nbsp;&nbsp;
+                      <sup>3</sup>Peking University&nbsp;&nbsp;&nbsp;&nbsp;
+                      <sup>4</sup>Tsinghua University<br/>
+                      <sup>5</sup>Institute of Automation, Chinese Academy of Sciences&nbsp;&nbsp;&nbsp;&nbsp;
+                      <sup>6</sup>The University of Chicago&nbsp;&nbsp;&nbsp;&nbsp;
+                      <sup>7</sup>Nanyang Technological University<br/>
+                      <sup>†</sup>Project Leader&nbsp;&nbsp;&nbsp;&nbsp;<sup>∗</sup>Corresponding Author
+                    </span>
+                  </div>
+
+                  <!-- Institution Logos -->
+                  <div class="institution-logos" style="margin-top: 20px; display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; align-items: center;">
+                    <img src="figures/StepFun.png" alt="StepFun" style="height: 60px;">
+                    <img src="figures/SCUT.png" alt="South China University of Technology" style="height: 60px;">
+                    <img src="figures/THU.png" alt="Tsinghua University" style="height: 60px;">
+                    <img src="figures/PKU.png" alt="Peking University" style="height: 60px;">
+                    <img src="figures/CASIA.png" alt="Institute of Automation, Chinese Academy of Sciences" style="height: 60px;">
+                    <img src="figures/NTU.png" alt="Nanyang Technological University" style="height: 80px;">
+                  </div>
+
+                  <div class="column has-text-centered">
+                    <div class="publication-links">
+                         <!-- Arxiv PDF link -->
+                      <span class="link-block">
+                        <a href="https://arxiv.org/pdf/2602.09007" target="_blank"
+                        class="external-link button is-normal is-rounded is-dark">
+                        <span class="icon">
+                          <i class="fas fa-file-pdf"></i>
+                        </span>
+                        <span>Paper</span>
+                      </a>
+                    </span>
+
+                    <!-- Dataset link -->
+                    <span class="link-block">
+                      <a href="https://huggingface.co/datasets/stepfun-ai/GEBench" target="_blank"
+                      class="external-link button is-normal is-rounded is-dark">
+                      <span class="icon">
+                        <i class="fas fa-download"></i>
+                      </span>
+                      <span>Dataset</span>
+                    </a>
+                  </span>
+
+                  <!-- Github link -->
+                  <span class="link-block">
+                    <a href="https://github.com/stepfun-ai/GEBench" target="_blank"
+                    class="external-link button is-normal is-rounded is-dark">
+                    <span class="icon">
+                      <i class="fab fa-github"></i>
+                    </span>
+                    <span>Code</span>
+                  </a>
+                </span>
+
+                <!-- Data Link -->
+                <span class="link-block">
+                  <a class="external-link button is-normal is-rounded is-dark"
+                    target="_blank" href="#">
+                    <span class="icon"><i class="fas fa-database"></i></span>
+                    <span>Model Results (Coming Soon)</span>
+                  </a>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Leaderboard -->
+<section class="leaderboard-section" id="leaderboard">
+  <div class="container is-max-widescreen">
+    <div class="leaderboard-card">
+      <h2 class="leaderboard-title" style="font-weight: bold; color: #0b63f6;">GEBench Leaderboard</h2>
+      <p class="leaderboard-subtitle">
+        <strong>Main evaluation results on GEBench across Chinese and English subsets.</strong>
+        The table compares 8 commercial models and 4 open-source models across five core dimensions.
+      </p>
+
+      <div class="geb-legend">
+        <span class="geb-legend-item"><span class="geb-swatch" style="background:#F49767;"></span>rank#1</span>
+        <span class="geb-legend-item"><span class="geb-swatch" style="background:#F5D5AC;"></span>rank#2</span>
+      </div>
+
+      <div class="geb-table-wrap">
+        <table class="geb-table" aria-label="Main evaluation results on GEBench across Chinese and English subsets">
+          <thead>
+            <tr>
+              <th class="model" rowspan="2">Model</th>
+              <th colspan="6">Chinese Subset</th>
+              <th class="group-divider" colspan="6">English Subset</th>
+            </tr>
+            <tr>
+              <th>single<br>-step</th>
+              <th>multi<br>-step</th>
+              <th>fiction<br>-app</th>
+              <th>real<br>-app</th>
+              <th>ground<br>-ing</th>
+              <th><strong>GE<br>Score</strong></th>
+              <th class="group-divider">single<br>-step</th>
+              <th>multi<br>-step</th>
+              <th>fiction<br>-app</th>
+              <th>real<br>-app</th>
+              <th>ground<br>-ing</th>
+              <th><strong>GE<br>Score</strong></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="model">Nano Banana Pro</td>
+              <td class="cell-gold"><strong>84.50</strong></td>
+              <td class="cell-gold"><strong>68.65</strong></td>
+              <td class="cell-gold"><strong>65.75</strong></td>
+              <td class="cell-silver">64.35</td>
+              <td class="cell-gold"><strong>64.83</strong></td>
+              <td class="cell-gold"><strong>69.62</strong></td>
+              <td class="group-divider cell-gold"><strong>84.32</strong></td>
+              <td class="cell-gold"><strong>69.51</strong></td>
+              <td>46.33</td>
+              <td>47.20</td>
+              <td class="cell-gold"><strong>58.64</strong></td>
+              <td class="cell-silver">61.20</td>
+            </tr>
+
+            <tr>
+              <td class="model">Nano Banana</td>
+              <td>64.36</td>
+              <td>34.16</td>
+              <td class="cell-silver">64.82</td>
+              <td class="cell-gold"><strong>65.89</strong></td>
+              <td>54.48</td>
+              <td>56.74</td>
+              <td class="group-divider">64.80</td>
+              <td>50.75</td>
+              <td>48.88</td>
+              <td>47.12</td>
+              <td>49.04</td>
+              <td>52.12</td>
+            </tr>
+
+            <tr>
+              <td class="model">GPT-image-1.5</td>
+              <td class="cell-silver">83.79</td>
+              <td class="cell-silver">56.97</td>
+              <td>60.11</td>
+              <td>55.65</td>
+              <td>53.33</td>
+              <td class="cell-silver">63.22</td>
+              <td class="group-divider cell-silver">80.80</td>
+              <td>58.87</td>
+              <td class="cell-gold"><strong>63.68</strong></td>
+              <td class="cell-gold"><strong>58.93</strong></td>
+              <td>49.23</td>
+              <td class="cell-gold"><strong>63.16</strong></td>
+            </tr>
+
+            <tr>
+              <td class="model">GPT-image-1.0</td>
+              <td>64.72</td>
+              <td>49.20</td>
+              <td>57.31</td>
+              <td>59.04</td>
+              <td>31.68</td>
+              <td>52.39</td>
+              <td class="group-divider">60.92</td>
+              <td class="cell-silver">64.33</td>
+              <td class="cell-silver">58.94</td>
+              <td class="cell-silver">56.16</td>
+              <td>37.84</td>
+              <td>55.64</td>
+            </tr>
+
+            <tr>
+              <td class="model">Seedream 4.5</td>
+              <td>63.64</td>
+              <td>53.11</td>
+              <td>56.48</td>
+              <td>53.44</td>
+              <td>52.90</td>
+              <td>55.91</td>
+              <td class="group-divider">49.49</td>
+              <td>45.30</td>
+              <td>53.81</td>
+              <td>51.80</td>
+              <td>49.63</td>
+              <td>50.01</td>
+            </tr>
+
+            <tr>
+              <td class="model">Seedream 4.0</td>
+              <td>62.04</td>
+              <td>48.64</td>
+              <td>49.28</td>
+              <td>50.93</td>
+              <td>53.53</td>
+              <td>52.88</td>
+              <td class="group-divider">53.28</td>
+              <td>37.57</td>
+              <td>47.92</td>
+              <td>49.36</td>
+              <td>44.17</td>
+              <td>46.46</td>
+            </tr>
+
+            <tr>
+              <td class="model">Wan 2.6</td>
+              <td>64.20</td>
+              <td>50.11</td>
+              <td>52.72</td>
+              <td>50.40</td>
+              <td class="cell-silver">59.58</td>
+              <td>55.40</td>
+              <td class="group-divider">60.17</td>
+              <td>44.36</td>
+              <td>49.55</td>
+              <td>44.80</td>
+              <td>53.36</td>
+              <td>50.45</td>
+            </tr>
+
+            <tr>
+              <td class="model">Flux-2-Pro</td>
+              <td>68.83</td>
+              <td>55.07</td>
+              <td>58.13</td>
+              <td>55.41</td>
+              <td>50.24</td>
+              <td>57.54</td>
+              <td class="group-divider">61.00</td>
+              <td>52.17</td>
+              <td>49.92</td>
+              <td>47.16</td>
+              <td>45.67</td>
+              <td>51.18</td>
+            </tr>
+
+            <tr class="divider-row">
+              <td class="model">Bagel</td>
+              <td>34.84</td>
+              <td>13.45</td>
+              <td>27.36</td>
+              <td>33.52</td>
+              <td>35.10</td>
+              <td>28.85</td>
+              <td class="group-divider">32.91</td>
+              <td>8.61</td>
+              <td>26.08</td>
+              <td>35.12</td>
+              <td>37.30</td>
+              <td>28.00</td>
+            </tr>
+
+            <tr>
+              <td class="model">UniWorld-V2</td>
+              <td>55.33</td>
+              <td>24.95</td>
+              <td>32.03</td>
+              <td>21.39</td>
+              <td>49.60</td>
+              <td>36.66</td>
+              <td class="group-divider">42.68</td>
+              <td>14.14</td>
+              <td>30.08</td>
+              <td>26.83</td>
+              <td>47.04</td>
+              <td>32.15</td>
+            </tr>
+
+            <tr>
+              <td class="model">Qwen-Image-Edit</td>
+              <td>41.12</td>
+              <td>26.79</td>
+              <td>23.78</td>
+              <td>26.10</td>
+              <td>50.80</td>
+              <td>33.72</td>
+              <td class="group-divider">40.12</td>
+              <td>18.61</td>
+              <td>25.80</td>
+              <td>25.95</td>
+              <td class="cell-silver">54.55</td>
+              <td>33.01</td>
+            </tr>
+
+            <tr>
+              <td class="model">Longcat-Image</td>
+              <td>48.76</td>
+              <td>12.75</td>
+              <td>30.03</td>
+              <td>30.00</td>
+              <td>51.02</td>
+              <td>34.51</td>
+              <td class="group-divider">36.69</td>
+              <td>8.44</td>
+              <td>37.30</td>
+              <td>36.83</td>
+              <td>47.12</td>
+              <td>33.28</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- End Leaderboard -->
+
+<!-- Ranking Leaderboard -->
+<section class="leaderboard-section" id="ranking">
+  <div class="container is-max-widescreen">
+    <div class="leaderboard-card">
+      <h2 class="leaderboard-title" style="font-weight: bold; color: #0b63f6;">Model Rankings</h2>
+      <p class="leaderboard-subtitle">
+        <strong>Overall model rankings based on average GE-Score across Chinese and English subsets.</strong>
+      </p>
+
+      <div class="geb-table-wrap">
+        <table class="geb-table" aria-label="Model rankings by average GE-Score">
+          <thead>
+            <tr>
+              <th>Rank</th>
+              <th class="model">Model</th>
+              <th><strong>Avg GE-Score</strong></th>
+              <th>Chinese</th>
+              <th>English</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="text-align: center;"><strong>1</strong></td>
+              <td class="model cell-gold"><strong>Nano Banana Pro</strong></td>
+              <td class="cell-gold"><strong>65.41</strong></td>
+              <td>69.62</td>
+              <td>61.20</td>
+            </tr>
+            <tr>
+              <td style="text-align: center;"><strong>2</strong></td>
+              <td class="model cell-silver"><strong>GPT-image-1.5</strong></td>
+              <td class="cell-silver"><strong>63.19</strong></td>
+              <td>63.22</td>
+              <td>63.16</td>
+            </tr>
+            <tr>
+              <td style="text-align: center;">3</td>
+              <td class="model">Nano Banana</td>
+              <td>54.43</td>
+              <td>56.74</td>
+              <td>52.12</td>
+            </tr>
+            <tr>
+              <td style="text-align: center;">4</td>
+              <td class="model">Flux-2-Pro</td>
+              <td>54.36</td>
+              <td>57.54</td>
+              <td>51.18</td>
+            </tr>
+            <tr>
+              <td style="text-align: center;">5</td>
+              <td class="model">GPT-image-1.0</td>
+              <td>54.02</td>
+              <td>52.39</td>
+              <td>55.64</td>
+            </tr>
+            <tr>
+              <td style="text-align: center;">6</td>
+              <td class="model">Seedream 4.5</td>
+              <td>52.96</td>
+              <td>55.91</td>
+              <td>50.01</td>
+            </tr>
+            <tr>
+              <td style="text-align: center;">7</td>
+              <td class="model">Wan 2.6</td>
+              <td>52.92</td>
+              <td>55.40</td>
+              <td>50.45</td>
+            </tr>
+            <tr>
+              <td style="text-align: center;">8</td>
+              <td class="model">Seedream 4.0</td>
+              <td>49.67</td>
+              <td>52.88</td>
+              <td>46.46</td>
+            </tr>
+            <tr>
+              <td style="text-align: center;">9</td>
+              <td class="model">UniWorld-V2</td>
+              <td>34.41</td>
+              <td>36.66</td>
+              <td>32.15</td>
+            </tr>
+            <tr>
+              <td style="text-align: center;">10</td>
+              <td class="model">Longcat-Image</td>
+              <td>33.89</td>
+              <td>34.51</td>
+              <td>33.28</td>
+            </tr>
+            <tr>
+              <td style="text-align: center;">11</td>
+              <td class="model">Qwen-Image-Edit</td>
+              <td>33.36</td>
+              <td>33.72</td>
+              <td>33.01</td>
+            </tr>
+            <tr>
+              <td style="text-align: center;">12</td>
+              <td class="model">Bagel</td>
+              <td>28.43</td>
+              <td>28.85</td>
+              <td>28.00</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- End Ranking Leaderboard -->
+
+<!-- Figures -->
+<section class="section" id="figures">
+  <div class="container is-max-widescreen">
+    <h2 class="title is-3 has-text-centered">Figures</h2>
+
+    <div class="columns is-variable is-6">
+      <div class="column is-12">
+        <details class="geb-accordion" open id="fig-framework">
+          <summary>Framework Comparison</summary>
+          <div class="geb-accordion-body">
+            <figure class="image">
+              <img class="geb-figure-img" src="figures/teaser.jpg" alt="GEBench framework comparison">
+            </figure>
+            <p class="geb-caption"><strong>Benchmark Positioning.</strong> GEBench compared with traditional T2I benchmarks and video generation benchmarks.</p>
+          </div>
+        </details>
+
+        <details class="geb-accordion" open id="fig-task-suites">
+          <summary>Task suites (five task types)</summary>
+          <div class="geb-accordion-body">
+            <figure class="image">
+              <img class="geb-figure-img" src="figures/visual_cases_mk3.png" alt="Examples of the five task types in GEBench">
+            </figure>
+            <p class="geb-caption"><strong>Task suites.</strong> Examples of the five task types in GEBench.</p>
+          </div>
+        </details>
+
+        <details class="geb-accordion" open id="fig-visual-cases">
+          <summary>Visual Cases</summary>
+          <div class="geb-accordion-body">
+            <figure class="image">
+              <img class="geb-figure-img" src="figures/visual_cases.png" alt="GEBench visual cases">
+            </figure>
+            <p class="geb-caption"><strong>Visual Cases.</strong> Model performance comparison on key challenging scenarios including text rendering, icon interpretation, and localization precision.</p>
+          </div>
+        </details>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- End Figures -->
+
+<!--BibTex citation -->
+  <section class="section" id="BibTeX">
+    <div class="container is-max-desktop content">
+      <h2 class="title">BibTeX</h2>
+      <pre><code>
+        @article{li2026gebench,
+          title={GEBench: Benchmarking Image Generation Models as GUI Environments},
+          author={Haodong Li and Jingwei Wu and Quan Sun and Guopeng Li and Juanxi Tian and Huanyu Zhang and Yanlin Lai and Ruichuan An and Hongbo Peng and Yuhong Dai and Chenxi Li and Chunmei Qing and Jia Wang and Ziyang Meng and Zheng Ge and Xiangyu Zhang and Daxin Jiang},
+          journal={arXiv preprint arXiv:2602.09007},
+          year={2026}
+        }
+      </code></pre>
+    </div>
+</section>
+<!--End BibTex citation -->
+
+
+  <footer class="footer">
+  <div class="container">
+    <div class="columns is-centered">
+      <div class="column is-8">
+        <div class="content">
+
+          <p>
+            © 2025 GEBench Authors ·
+            <a href="#" target="_blank">Code</a> ·
+            <a href="mailto:contact@gebench.org">Contact</a> · <br>
+            Licensed under
+            <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/" target="_blank">
+              CC BY-SA 4.0
+            </a>.
+          </p>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- Statcounter tracking code -->
+  
+<!-- You can add a tracker to track page visits by creating an account at statcounter.com -->
+
+    <!-- End of Statcounter Code -->
+
+  </body>
+  </html>
